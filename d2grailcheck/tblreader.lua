@@ -34,6 +34,7 @@ function tblreader.read(...)
 		local firstStringOffset = decode_uint32(data, 9)
 		local lastStringEnd = decode_uint32(data, 17)
 		local firstEntryOffset = 21 + 2*idCount
+		local addedThisFile = {}
 		for i=1,entryCount do
 			local entryOffset = firstEntryOffset + (i-1)*17
 			local nameOffset = decode_uint32(data, entryOffset+7)
@@ -43,7 +44,13 @@ function tblreader.read(...)
 				local name = decode_string(data, nameOffset)
 				local str = data:sub(stringOffset+1, stringOffset+stringLength-1)
 				assert(#str == stringLength-1, (#str) .. " ~= " .. (stringLength-1))
-				tbl[name] = str
+				-- within a tbl file, the first presence of a key
+				-- takes precedent, so any further definitions are
+				-- ignored (this matters for e.g. StrSklTabItem6)
+				if not addedThisFile[name] then
+					tbl[name] = str
+					addedThisFile[name] = true
+				end
 			end
 		end
 	end
