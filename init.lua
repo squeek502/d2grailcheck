@@ -1,6 +1,7 @@
 local utils = require('d2grailcheck.utils')
 local Data = require('d2grailcheck.data')
 local Checker = require('d2grailcheck.checker')
+local simpleDecorator = require('d2grailcheck.decorators.simple')
 
 local GAME_DIR = "C:/Program Files (x86)/Diablo II/"
 local SAVE_DIR = GAME_DIR .. "Save/"
@@ -8,7 +9,18 @@ local items = assert(utils.getItemsInDirectory(SAVE_DIR))
 
 local data = Data.new(GAME_DIR)
 local checker = Checker.new(data, items)
+local out = simpleDecorator(checker)
+print(out)
 
+local function dump(tbl, key)
+  for _, v in ipairs(tbl[key]) do
+    print(v, tbl:getName(v))
+  end
+end
+
+dump(checker.runes, 'missing')
+
+--[[
 local function getSimpleOutput(groups)
   local maxName, maxCurDigits, maxTotalDigits
   for _, group in ipairs(groups) do
@@ -38,8 +50,8 @@ local out = getSimpleOutput({
   {name="Runes", cur=checker.runes.count, total=checker.runes.total},
   {name="Eth Uniques", cur=checker.ethUniques.count, total=checker.ethUniques.total},
 })
-
 print(table.concat(out, "\n"))
+]]
 
 --[[
 for _, id in ipairs(checker.uniques.missing) do

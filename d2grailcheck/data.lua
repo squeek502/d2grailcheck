@@ -53,6 +53,10 @@ function Data:isRune(code)
   return self.runeItemCodes[code] ~= nil
 end
 
+function Data:isRuneword(codestring)
+  return self.runeWords[codestring] ~= nil
+end
+
 function Data:getItemCodeName(code)
   return self.itemCodeNames[code]
 end
@@ -79,6 +83,7 @@ function Data:_loadExcelData()
   self.weaponData = excelToTable(stringToArray(assert(self.patchMpq:read('data\\global\\excel\\Weapons.txt'))))
   self.armorData = excelToTable(stringToArray(assert(self.patchMpq:read('data\\global\\excel\\Armor.txt'))))
   self.miscData = excelToTable(stringToArray(assert(self.patchMpq:read('data\\global\\excel\\Misc.txt'))))
+  self.runewordData = excelToTable(stringToArray(assert(self.patchMpq:read('data\\global\\excel\\Runes.txt'))))
 end
 
 function Data:canRowBeEth(row)
@@ -108,10 +113,12 @@ function Data:_setup()
   self.weaponDict = {}
   self.armorDict = {}
   self.noDurabilityDict = {}
+  self.runeWords = {}
   self.totalRunes = 0
   self.totalEthUniques = 0
   self.totalUniques = 0
   self.totalSetItems = #self.setData
+  self.totalRunewords = 0
 
   for _, row in ipairs(self.weaponData) do
     if row.quest and row.quest ~= 0 then
@@ -150,6 +157,14 @@ function Data:_setup()
       if self:canRowBeEth(row) then
         self.totalEthUniques = self.totalEthUniques + 1
       end
+    end
+  end
+
+  for _, row in ipairs(self.runewordData) do
+    if row.complete == 1 then
+      local runeCodes = (row.Rune1 or "") .. (row.Rune2 or "") .. (row.Rune3 or "") .. (row.Rune4 or "") .. (row.Rune5 or "") .. (row.Rune6 or "")
+      self.runeWords[runeCodes] = self.stringTable[row.Name]
+      self.totalRunewords = self.totalRunewords + 1
     end
   end
 end

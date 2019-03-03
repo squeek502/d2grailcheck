@@ -77,6 +77,7 @@ function Checker.new(data, items)
   self.uniques = Uniques.new()
   self.ethUniques = Uniques.new()
   self.runes = ItemGroup.new()
+  self.runewords = ItemGroup.new()
   if type(items) == 'table' then
     self:check(items)
   end
@@ -97,6 +98,17 @@ function Checker:check(items)
     elseif self.data:isRune(item.code) then
       local id = item.code
       self.runes:add(id)
+    elseif item.isRuneword then
+      local runes = item.socketedItems
+      if #runes == item.numSockets then
+        local runeCodes = ""
+        for _, rune in ipairs(runes) do
+          runeCodes = runeCodes .. rune.code
+        end
+        if self.data:isRuneword(runeCodes) then
+          self.runewords:add(runeCodes)
+        end
+      end
     end
   end
 
@@ -104,12 +116,14 @@ function Checker:check(items)
     local id = row._ID
     if row.enabled == 1 and not self.data:isQuestItem(row.code) then
       self.uniques:setNames(id, self.data:getString(row.index), self.data:getItemCodeName(row.code))
-      self.ethUniques:setNames(id, self.data:getString(row.index), self.data:getItemCodeName(row.code))
       if not self.uniques:has(id) then
         self.uniques:addMissing(id)
       end
-      if not self.ethUniques:has(id) and self.data:canRowBeEth(row) then
-        self.ethUniques:addMissing(id)
+      if self.data:canRowBeEth(row) then
+        self.ethUniques:setNames(id, self.data:getString(row.index), self.data:getItemCodeName(row.code))
+        if not self.ethUniques:has(id) then
+          self.ethUniques:addMissing(id)
+        end
       end
     end
   end
@@ -129,10 +143,18 @@ function Checker:check(items)
     end
   end
 
+  for codes, name in pairs(self.data.runeWords) do
+    self.runewords:setNames(codes, name)
+    if not self.runewords:has(codes) then
+      self.runewords:addMissing(codes)
+    end
+  end
+
   self.uniques:finalize()
   self.ethUniques:finalize()
   self.sets:finalize()
   self.runes:finalize()
+  self.runewords:finalize()
 end
 
 --[[

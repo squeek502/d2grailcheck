@@ -27,6 +27,7 @@ return function(checker)
     {name="Set Items", cur=checker.sets.count, total=checker.sets.total},
     {name="Runes", cur=checker.runes.count, total=checker.runes.total},
     {name="Eth Uniques", cur=checker.ethUniques.count, total=checker.ethUniques.total},
+    {name="Runewords", cur=checker.runewords.count, total=checker.runewords.total}
   })
   return table.concat(out, "\n")
 end
