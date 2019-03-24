@@ -22,12 +22,12 @@ local function tryLoadMpq(dir, names)
   return nil, 'MPQ file not found with name(s) ' .. table.concat(names, ', ') .. ' in \'' .. dir ..'\''
 end
 
-function Data.new(dataDir)
+function Data.new(gameDir)
   local self = setmetatable({}, Data)
-  self.dir = dataDir
-  self.patchMpq = assert(tryLoadMpq(self.dir, {'Patch_D2.mpq', 'patch_d2.mpq'}))
-  self.expMpq = assert(tryLoadMpq(self.dir, 'd2exp.mpq'))
-  self.dataMpq = assert(tryLoadMpq(self.dir, 'd2data.mpq'))
+  self.dir = gameDir
+  self.patchMpq = tryLoadMpq(self.dir, {'Patch_D2.mpq', 'patch_d2.mpq'})
+  self.expMpq = tryLoadMpq(self.dir, 'd2exp.mpq')
+  self.dataMpq = tryLoadMpq(self.dir, 'd2data.mpq')
   self:_loadStringTable()
   self:_loadExcelData()
   self:_setup()
@@ -69,21 +69,36 @@ function Data:getString(key)
   return self.stringTable[key]
 end
 
+function Data:_getDataFromDiskOrMPQ(mpq, path)
+  local filepath = path:gsub("\\", "/")
+  filepath = pathjoin(self.dir, filepath)
+  if pathexists(filepath) then
+    local file = assert(io.open(filepath, "rb"))
+    local contents = file:read("*a")
+    file:close()
+    return contents
+  elseif mpq then
+    return assert(mpq:read(path))
+  else
+    return nil, "filepath '"..filepath.."' doesn't exist and mpq is nil"
+  end
+end
+
 function Data:_loadStringTable()
   self.stringTable = tblreader.read(
-    assert(self.dataMpq:read("data\\local\\lng\\eng\\string.tbl")),
-    assert(self.expMpq:read("data\\local\\lng\\eng\\expansionstring.tbl")),
-    assert(self.patchMpq:read("data\\local\\lng\\eng\\patchstring.tbl"))
+    assert(self:_getDataFromDiskOrMPQ(self.dataMpq, "data\\local\\lng\\eng\\string.tbl")),
+    assert(self:_getDataFromDiskOrMPQ(self.expMpq, "data\\local\\lng\\eng\\expansionstring.tbl")),
+    assert(self:_getDataFromDiskOrMPQ(self.patchMpq, "data\\local\\lng\\eng\\patchstring.tbl"))
   )
 end
 
 function Data:_loadExcelData()
-  self.uniqueData = excelToTable(stringToArray(assert(self.patchMpq:read('data\\global\\excel\\UniqueItems.txt'))))
-  self.setData = excelToTable(stringToArray(assert(self.patchMpq:read('data\\global\\excel\\SetItems.txt'))))
-  self.weaponData = excelToTable(stringToArray(assert(self.patchMpq:read('data\\global\\excel\\Weapons.txt'))))
-  self.armorData = excelToTable(stringToArray(assert(self.patchMpq:read('data\\global\\excel\\Armor.txt'))))
-  self.miscData = excelToTable(stringToArray(assert(self.patchMpq:read('data\\global\\excel\\Misc.txt'))))
-  self.runewordData = excelToTable(stringToArray(assert(self.patchMpq:read('data\\global\\excel\\Runes.txt'))))
+  self.uniqueData = excelToTable(stringToArray(assert(self:_getDataFromDiskOrMPQ(self.patchMpq, 'data\\global\\excel\\UniqueItems.txt'))))
+  self.setData = excelToTable(stringToArray(assert(self:_getDataFromDiskOrMPQ(self.patchMpq, 'data\\global\\excel\\SetItems.txt'))))
+  self.weaponData = excelToTable(stringToArray(assert(self:_getDataFromDiskOrMPQ(self.patchMpq, 'data\\global\\excel\\Weapons.txt'))))
+  self.armorData = excelToTable(stringToArray(assert(self:_getDataFromDiskOrMPQ(self.patchMpq, 'data\\global\\excel\\Armor.txt'))))
+  self.miscData = excelToTable(stringToArray(assert(self:_getDataFromDiskOrMPQ(self.patchMpq, 'data\\global\\excel\\Misc.txt'))))
+  self.runewordData = excelToTable(stringToArray(assert(self:_getDataFromDiskOrMPQ(self.patchMpq, 'data\\global\\excel\\Runes.txt'))))
 end
 
 function Data:canRowBeEth(row)
