@@ -7,6 +7,9 @@ local tblreader = require('d2grailcheck.tblreader')
 local Data = {}
 Data.__index = Data
 
+-- this ID is not in UniqueItems.txt
+Data.STANDARD_OF_HEROES_ID = 4095
+
 local function tryLoadMpq(dir, names)
   if type(names) == 'string' then names = {names} end
   for _, name in ipairs(names) do
@@ -47,6 +50,10 @@ function Data:hasDurability(code)
     return false
   end
   return self:isWeapon(code) or self:isArmor(code)
+end
+
+function Data:isStandardOfHeroes(uniqueID)
+  return uniqueID == self.STANDARD_OF_HEROES_ID
 end
 
 function Data:isRune(code)

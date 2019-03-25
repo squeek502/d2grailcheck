@@ -84,9 +84,13 @@ function Checker.new(data, items)
   return self
 end
 
+function Checker:isUniqueApplicable(id, code)
+  return not self.data:isQuestItem(code) and not self.data:isStandardOfHeroes(id)
+end
+
 function Checker:check(items)
   for _, item in ipairs(items) do
-    if item.rarity == "unique" then
+    if item.rarity == "unique" and self:isUniqueApplicable(item.rarityData.id, item.code) then
       local id = item.rarityData.id
       self.uniques:add(id)
       if item.ethereal then
@@ -114,7 +118,7 @@ function Checker:check(items)
 
   for _, row in ipairs(self.data.uniqueData) do
     local id = row._ID
-    if row.enabled == 1 and not self.data:isQuestItem(row.code) then
+    if row.enabled == 1 and self:isUniqueApplicable(id, row.code) then
       self.uniques:setNames(id, self.data:getString(row.index), self.data:getItemCodeName(row.code))
       if not self.uniques:has(id) then
         self.uniques:addMissing(id)
