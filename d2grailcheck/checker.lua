@@ -53,6 +53,11 @@ function ItemGroup:finalize()
     table.insert(self.have, id)
   end
   self.total = #self.have + #self.missing
+  local nameTotal = 0
+  for _ in pairs(self.names) do
+    nameTotal = nameTotal + 1
+  end
+  assert(self.total == nameTotal)
 end
 
 function ItemGroup:iterator()
@@ -70,7 +75,7 @@ end
 local Checker = {}
 Checker.__index = Checker
 
-function Checker.new(data, items)
+function Checker.new(data, items, options)
   local self = setmetatable({}, Checker)
   self.data = data
   self.sets = ItemGroup.new()
@@ -78,6 +83,7 @@ function Checker.new(data, items)
   self.ethUniques = Uniques.new()
   self.runes = ItemGroup.new()
   self.runewords = ItemGroup.new()
+  self.options = options or {}
   if type(items) == 'table' then
     self:check(items)
   end

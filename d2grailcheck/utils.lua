@@ -92,12 +92,29 @@ function utils.excelToTable(lines)
   return rows
 end
 
+function utils.arrayContains(arr, needle)
+  for _, v in ipairs(arr) do
+    if v == needle then
+      return true
+    end
+  end
+  return false
+end
+
 local function dirHas113Dlls(dir)
   return utils.pathexists(utils.pathjoin(dir, "D2Client.dll")) or utils.pathexists(utils.pathjoin(dir, "d2client.dll"))
 end
 
 local function dirIsD2(dir)
   return utils.pathexists(utils.pathjoin(dir, "Game.exe")) and utils.pathexists(utils.pathjoin(dir, "Diablo II.exe"))
+end
+
+function utils.guessSaveDir(gameDir)
+  local _, saveDir = utils.getDiabloVersionAndSaveDir(gameDir)
+  if not saveDir then
+    saveDir = utils.pathjoin(gameDir, "Save")
+  end
+  return saveDir
 end
 
 function utils.getDiabloVersionAndSaveDir(gameDir)
