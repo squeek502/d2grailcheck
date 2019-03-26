@@ -4,8 +4,8 @@ local Checker = require('d2grailcheck.checker')
 local argparse = require('d2grailcheck.argparse')
 
 local formats = {
-  ["simple"] = require('d2grailcheck.decorators.simple'),
-  ["d2-holy-grail"] = require('d2grailcheck.decorators.d2-holy-grail'),
+  ["simple"] = require('d2grailcheck.formats.simple'),
+  ["d2-holy-grail"] = require('d2grailcheck.formats.d2-holy-grail'),
 }
 local DEFAULT_GAME_DIR = {
   "C:/Program Files (x86)/Diablo II/",

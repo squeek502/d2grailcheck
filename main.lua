@@ -6,7 +6,7 @@ local lfs = require "lfs"
 local d2itemreader = require "d2itemreader"
 local Data = require('d2grailcheck.data')
 local Checker = require('d2grailcheck.checker')
-local simpleDecorator = require('d2grailcheck.decorators.simple')
+local simpleFormatter = require('d2grailcheck.formats.simple')
 local inifile = require('inifile')
 local steps = false
 ui.Init()
@@ -324,7 +324,7 @@ do
 
     local data = Data.new(gameDirEntry:Text())
     local checker = Checker.new(data, items)
-    local out = simpleDecorator(checker)
+    local out = simpleFormatter(checker)
     mle:Text(out)
   end)
   mainvbox:Append(checkButton)
