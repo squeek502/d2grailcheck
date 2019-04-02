@@ -535,6 +535,17 @@ local function scantable (what, closechar, str, startpos, nullval, objectmeta, a
       val2, pos, err = scanvalue (str, pos, nullval, objectmeta, arraymeta)
       if err then return nil, pos, err end
       tbl[val1] = val2
+
+      -- store key order
+      local mt = getmetatable(tbl)
+      if not mt.__jsonorder then
+        -- we need to copy the mt and reassign it since every object will
+        -- have the same metatable reference
+        mt = {__jsontype=mt.__jsontype, __jsonorder={}}
+        setmetatable(tbl, mt)
+      end
+      table.insert(mt.__jsonorder, val1)
+
       pos = scanwhite (str, pos)
       if not pos then return unterminated (str, what, startpos) end
       char = strsub (str, pos, pos)
