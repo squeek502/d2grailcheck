@@ -74,7 +74,12 @@ local function populateGrail(grail, itemgroup)
     end
     local grailObj = findGrailObj(grail, name)
     if grailObj then
-      grailObj.wasFound = itemgroup:has(id)
+      local count = itemgroup.counts[id]
+      if count and count > 1 then
+        grailObj.wasFound = count
+      else
+        grailObj.wasFound = count and count > 0
+      end
       -- TODO grailObj.isPerfect = ?
       -- TODO grailObj.note = "" -- info about source(s)
     else
@@ -82,12 +87,6 @@ local function populateGrail(grail, itemgroup)
       assert(canSkip or grailObj, "have item that d2-holy-grail doesn't: id="..id.." name="..name)
     end
   end
-end
-
-local function getToken()
-  -- ISO 8601 via JavaScript's Date.prototype.toISOString()
-  -- e.g. 2019-03-25T21:21:25.027Z
-  return os.date("!%Y-%m-%dT%H:%M:%S.000Z")
 end
 
 return function(checker)
@@ -101,7 +100,7 @@ return function(checker)
   populateGrail(setGrail, checker.sets)
   populateGrail(ethGrail, checker.ethUniques)
   populateGrail(runewordGrail, checker.runewords)
-  seed.token = getToken()
+  seed.token = "$TOKEN" -- placeholder to be replaced
   seed.password = checker.options.password
   return json.encode(seed)
 end
