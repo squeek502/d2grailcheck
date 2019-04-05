@@ -75,13 +75,25 @@ local function populateGrail(grail, itemgroup)
     local grailObj = findGrailObj(grail, name)
     if grailObj then
       local count = itemgroup.counts[id]
-      if count and count > 1 then
+      local wasFound = count ~= nil and count > 0
+      if wasFound and count > 1 then
         grailObj.wasFound = count
       else
-        grailObj.wasFound = count and count > 0
+        grailObj.wasFound = wasFound
       end
       -- TODO grailObj.isPerfect = ?
-      -- TODO grailObj.note = "" -- info about source(s)
+      if count and count > 0 then
+        local sources = {}
+        for _, item in ipairs(itemgroup.items[id]) do
+          local source = item.source.file:match("[\\/]?([^\\/]+)$")
+          if item.source.section then source = source .. " " .. item.source.section end
+          if item.source.page then source = source .. " page " .. item.source.page end
+          table.insert(sources, source)
+        end
+        grailObj.note = "Locations:\n"..table.concat(sources, "\n")
+      else
+        grailObj.note = nil
+      end
     else
       local canSkip = alwaysEth[name]
       assert(canSkip or grailObj, "have item that d2-holy-grail doesn't: id="..id.." name="..name)
