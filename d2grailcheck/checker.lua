@@ -9,15 +9,18 @@ function ItemGroup.new()
   self.have = {}
   self.names = {}
   self.baseNames = {}
+  self.items = {}
   return self
 end
 
-function ItemGroup:add(id)
+function ItemGroup:add(id, item)
   if self.counts[id] == nil then
     self.counts[id] = 0
     self.count = self.count + 1
   end
   self.counts[id] = self.counts[id] + 1
+  if not self.items[id] then self.items[id] = {} end
+  table.insert(self.items[id], item)
 end
 
 function ItemGroup:addMissing(id)
@@ -98,16 +101,16 @@ function Checker:check(items)
   for _, item in ipairs(items) do
     if item.rarity == "unique" and self:isUniqueApplicable(item.rarityData.id, item.code) then
       local id = item.rarityData.id
-      self.uniques:add(id)
+      self.uniques:add(id, item)
       if item.ethereal then
-        self.ethUniques:add(id)
+        self.ethUniques:add(id, item)
       end
     elseif item.rarity == "set" then
       local id = item.rarityData.id
-      self.sets:add(id)
+      self.sets:add(id, item)
     elseif self.data:isRune(item.code) then
       local id = item.code
-      self.runes:add(id)
+      self.runes:add(id, item)
     elseif item.isRuneword then
       local runes = item.socketedItems
       if #runes == item.numSockets then
@@ -116,7 +119,7 @@ function Checker:check(items)
           runeCodes = runeCodes .. rune.code
         end
         if self.data:isRuneword(runeCodes) then
-          self.runewords:add(runeCodes)
+          self.runewords:add(runeCodes, item)
         end
       end
     end
