@@ -59,7 +59,7 @@ end
 print("Save Directory: "..args.save_dir)
 
 -- Main logic
-local uv = require('uv')
+local luv = require('luv')
 
 coroutine.wrap(function()
 
@@ -77,7 +77,7 @@ coroutine.wrap(function()
     print("Preparing to sync with d2-holy-grail...")
     local json = require('d2grailcheck.dkjson')
     package.path = "./deps/?.lua;./deps/?/init.lua;" .. package.path
-    local http = require('coro-http')
+    local http = require('coro-http-luv')
     local endpoint = "https://d2-holy-grail.herokuapp.com/api/grail/"..args.username
 
     -- this is a bit silly, but this will fail and provide us with a
@@ -112,4 +112,4 @@ coroutine.wrap(function()
 
 end)()
 
-uv.run()
+luv.run()
