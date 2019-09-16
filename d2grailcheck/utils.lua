@@ -26,6 +26,24 @@ function utils.pathexists(path)
   return lfs.attributes(path, "mode") ~= nil
 end
 
+function utils.dirname(path)
+  return utils.pathnorm(path):match("(.*)[/\\].*")
+end
+
+local function isdir(path)
+  return lfs.attributes(path, "mode") == "directory"
+end
+
+function utils.mkdir(path)
+  if isdir(path) then return true end
+  local parent = utils.dirname(path)
+  if parent and not isdir(parent) then
+    local ok, err = utils.mkdir(parent)
+    if not ok then return ok, err end
+  end
+  return lfs.mkdir(path)
+end
+
 function utils.getItemsInDirectory(saveDir)
   local allItems = {}
   for file in lfs.dir(saveDir) do
@@ -44,6 +62,21 @@ function utils.getItemsInDirectory(saveDir)
     end
   end
   return allItems
+end
+
+function utils.deepCopy(orig)
+    local orig_type = type(orig)
+    local copy
+    if orig_type == 'table' then
+        copy = {}
+        for orig_key, orig_value in next, orig, nil do
+            copy[utils.deepCopy(orig_key)] = utils.deepCopy(orig_value)
+        end
+        setmetatable(copy, utils.deepCopy(getmetatable(orig)))
+    else -- number, string, boolean, etc
+        copy = orig
+    end
+    return copy
 end
 
 function utils.fileToArray(filepath)
@@ -68,6 +101,24 @@ function utils.splitString(str, sep)
   end
   table.insert(parts, str:sub(pos))
   return parts
+end
+
+function utils.arrayToMap(arr)
+  local map = {}
+  for _, v in ipairs(arr) do
+    map[v] = true
+  end
+  return map
+end
+
+function utils.mapToArray(map)
+  local arr = {}
+  for k, v in pairs(map) do
+    if v then
+      table.insert(arr, k)
+    end
+  end
+  return arr
 end
 
 function utils.excelToTable(lines)

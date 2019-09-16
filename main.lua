@@ -7,7 +7,7 @@ local d2itemreader = require "d2itemreader"
 local Data = require('d2grailcheck.data')
 local Checker = require('d2grailcheck.checker')
 local simpleFormatter = require('d2grailcheck.formats.simple')
-local inifile = require('inifile')
+local Settings = require('d2grailcheck.gui.settings')
 local steps = false
 ui.Init()
 
@@ -16,38 +16,11 @@ local versionLabel
 local saveDirEntry
 local gameDirEntry
 local filterCheckboxes = {}
-local SETTINGS = {
-  test = {
-    val=true,
-    arr = setmetatable({"a","b","c"}, {__tostring=function(t) return table.concat(t, ':') end})
-  },
-}
+
 local SETTINGS_FILE = "d2grailcheck.ini"
-
-local function loadSettings()
-  if not utils.pathexists(SETTINGS_FILE) then
-    return
-  end
-
-  local settings = inifile.parse(SETTINGS_FILE)
-
-  -- do more parsing and put into SETTINGS
-end
-
-local function saveSettings()
-  if not utils.pathexists(SETTINGS_FILE) then
-    -- TODO: mkdirs here
-  end
-
-  -- convert SETTINGS to an ini-saveable table
-  local settings
-
-  inifile.save(SETTINGS_FILE, settings)
-end
-
-loadSettings()
+local settings = Settings.load(SETTINGS_FILE)
 print(require('inspect')(settings))
---saveSettings()
+Settings.save(SETTINGS_FILE, settings)
 
 local function folderEntry(cb)
   local function onOpenFolderClicked(button, entry)
